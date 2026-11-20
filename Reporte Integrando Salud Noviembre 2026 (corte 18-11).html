@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reporte Meta Ads — Integrando Salud · Noviembre 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg:#e8f0f8; --surface:#ffffff; --surface2:#f4f8fc;
+    --border:rgba(0,0,0,0.08);
+    --accent:#10b981; --accent2:#ef4444; --accent3:#f59e0b; --accent4:#3b82f6;
+    --text:#0f172a; --muted:#64748b;
+    --good:#059669; --warn:#d97706; --bad:#dc2626;
+    --purple:#8b5cf6; --teal:#06b6d4;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.6;}
+  .header{padding:44px 48px 36px;background:linear-gradient(135deg,#1a3a6b 0%,#2563eb 60%,#1d9ed8 100%);display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:16px;}
+  .header-tag{font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.65);margin-bottom:8px;}
+  .header-title{font-family:'DM Serif Display',serif;font-size:36px;line-height:1.1;color:#fff;}
+  .header-subtitle{color:rgba(255,255,255,0.65);font-size:14px;margin-top:6px;}
+  .header-date{text-align:right;color:rgba(255,255,255,0.65);font-size:13px;line-height:1.8;}
+  .header-date strong{color:#fff;display:block;font-size:15px;font-weight:500;}
+  .main{padding:40px 48px;max-width:1400px;}
+  .section-title{font-family:'DM Serif Display',serif;font-size:20px;color:var(--text);margin-bottom:20px;padding-bottom:10px;border-bottom:2px solid var(--border);display:flex;align-items:center;gap:10px;}
+  .section-title::before{content:'';display:inline-block;width:4px;height:20px;background:var(--accent4);border-radius:2px;}
+  .section{margin-bottom:48px;}
+  .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px;margin-bottom:48px;}
+  .kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px;position:relative;overflow:hidden;transition:box-shadow .2s;box-shadow:0 2px 8px rgba(0,0,0,0.06);}
+  .kpi-card:hover{box-shadow:0 6px 20px rgba(0,0,0,0.1);}
+  .kpi-card::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--accent-color,var(--accent4));border-radius:14px 14px 0 0;}
+  .kpi-label{font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+  .kpi-value{font-family:'DM Serif Display',serif;font-size:32px;color:var(--text);line-height:1;margin-bottom:6px;}
+  .kpi-sub{font-size:12px;color:var(--muted);}
+  .kpi-badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;margin-top:8px;}
+  .badge-good{background:rgba(16,185,129,0.1);color:#059669;}
+  .badge-warn{background:rgba(245,158,11,0.12);color:#d97706;}
+  .badge-bad{background:rgba(239,68,68,0.1);color:#dc2626;}
+  .goal-banner{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px 28px;margin-bottom:24px;display:flex;align-items:center;gap:24px;flex-wrap:wrap;box-shadow:0 2px 8px rgba(0,0,0,0.06);}
+  .goal-text{flex:1;min-width:200px;}
+  .goal-text h3{font-size:15px;font-weight:500;margin-bottom:4px;}
+  .goal-text p{font-size:13px;color:var(--muted);}
+  .goal-bar-wrap{flex:3;min-width:250px;}
+  .goal-bar-labels{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:6px;}
+  .goal-bar-track{background:rgba(0,0,0,0.06);border-radius:100px;height:12px;overflow:hidden;}
+  .goal-bar-fill{height:100%;border-radius:100px;}
+  .goal-pct{font-family:'DM Serif Display',serif;font-size:28px;white-space:nowrap;}
+  .chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;}
+  .chart-grid.single{grid-template-columns:1fr;}
+  .chart-grid.three{grid-template-columns:2fr 1fr;}
+  .chart-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06);}
+  .chart-card h3{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:20px;}
+  .chart-card canvas{max-height:260px;}
+  .data-table{width:100%;border-collapse:collapse;font-size:13px;}
+  .data-table th{text-align:left;font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);padding:10px 12px;border-bottom:2px solid var(--border);}
+  .data-table td{padding:12px 12px;border-bottom:1px solid rgba(0,0,0,0.05);color:var(--text);vertical-align:middle;}
+  .data-table tr:last-child td{border-bottom:none;}
+  .data-table tr:hover td{background:rgba(59,130,246,0.03);}
+  .num{font-variant-numeric:tabular-nums;font-weight:500;}
+  .rank{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:rgba(0,0,0,0.06);border-radius:6px;font-size:11px;font-weight:600;color:var(--muted);}
+  .rank-1{background:rgba(245,158,11,0.15);color:#d97706;}
+  .rank-2{background:rgba(100,116,139,0.12);color:#475569;}
+  .rank-3{background:rgba(249,115,22,0.12);color:#ea580c;}
+  .cpl-good{color:#059669;font-weight:600;}
+  .cpl-mid{color:#d97706;font-weight:600;}
+  .cpl-bad{color:#dc2626;font-weight:600;}
+  .campaign-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:16px;margin-bottom:20px;}
+  .campaign-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px;box-shadow:0 2px 8px rgba(0,0,0,0.06);}
+  .campaign-card h4{font-size:13px;font-weight:600;color:var(--text);margin-bottom:14px;line-height:1.4;padding-bottom:12px;border-bottom:1px solid var(--border);}
+  .campaign-stat-row{display:flex;justify-content:space-between;gap:14px;font-size:13px;padding:6px 0;border-bottom:1px solid rgba(0,0,0,0.04);}
+  .campaign-stat-row:last-child{border-bottom:none;}
+  .campaign-stat-row .label{color:var(--muted);}
+  .campaign-stat-row .value{font-weight:500;text-align:right;}
+  .relevance-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+  .relevance-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.06);}
+  .relevance-card .r-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;}
+  .relevance-card .r-value{font-family:'DM Serif Display',serif;font-size:38px;line-height:1;margin-bottom:6px;}
+  .relevance-card .r-desc{font-size:12px;color:var(--muted);line-height:1.5;}
+  .r-good{color:#059669;} .r-warn{color:#d97706;} .r-ok{color:#2563eb;} .r-bad{color:#dc2626;}
+  .insight-box{background:rgba(59,130,246,0.05);border:1px solid rgba(59,130,246,0.2);border-radius:10px;padding:14px 18px;margin-top:16px;font-size:13px;color:var(--text);line-height:1.6;}
+  .insight-box strong{color:#1d4ed8;}
+  .insight-warn{background:rgba(245,158,11,0.06);border-color:rgba(245,158,11,0.25);}
+  .insight-warn strong{color:#d97706;}
+  .insight-bad{background:rgba(239,68,68,0.05);border-color:rgba(239,68,68,0.2);}
+  .insight-bad strong{color:#dc2626;}
+  .camp-pill{display:inline-block;padding:2px 8px;border-radius:6px;background:rgba(59,130,246,0.1);color:#2563eb;font-size:10px;font-weight:600;margin-top:3px;max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .adset-pill{display:inline-block;padding:2px 8px;border-radius:6px;background:rgba(0,0,0,0.06);color:var(--muted);font-size:10px;font-weight:500;margin-top:2px;}
+  .note-banner{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:18px 24px;margin-bottom:32px;font-size:13px;color:var(--muted);line-height:1.7;}
+  .note-banner strong{color:var(--text);}
+  .footer{padding:32px 48px;border-top:1px solid var(--border);color:var(--muted);font-size:12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-top:40px;background:var(--surface);}
+  .footer span{color:#2563eb;}
+  @media(max-width:768px){
+    .header,.main{padding:24px;}
+    .chart-grid,.chart-grid.three{grid-template-columns:1fr !important;}
+    .relevance-grid{grid-template-columns:1fr;}
+    .kpi-grid{grid-template-columns:repeat(2,1fr);}
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="header-tag">dynic · Meta Ads Report</div>
+    <h1 class="header-title">Integrando Salud</h1>
+    <p class="header-subtitle">Reporte mensual · Noviembre 2026 (corte parcial)</p>
+  </div>
+  <div class="header-date">
+    <strong>Período del reporte</strong>
+    1 — 18 noviembre 2026<br>Fuente: lectura en vivo de Meta Ads Manager<br>Generado por dynic
+  </div>
+</div>
+
+<div class="main">
+
+  <div class="note-banner">
+    <strong>Sobre esta edición:</strong> los datos salen de la cuenta en vivo (API de Meta), no de un CSV. A diferencia del corte de octubre, esta vez se verificó cada conjunto de anuncios contra su propio "Resultado" configurado en Ads Manager y coincide exacto con el lead crudo — no hay diferencia por "Cliente potencial calificado" este mes. Sí sigue sin funcionar el desglose de leads por provincia vía API (la métrica vuelve en blanco, mismo problema que en octubre); si lo necesitás, pasame el CSV del período y lo agrego.
+  </div>
+
+  <!-- META GOAL -->
+  <div class="goal-banner">
+    <div class="goal-text">
+      <h3>🎯 Meta del período</h3>
+      <p>Objetivo: <strong>120 leads</strong> &nbsp;·&nbsp; Corte al 18/11: <strong>69 leads</strong> &nbsp;·&nbsp; 57.5% de la meta a 18 de 30 días</p>
+    </div>
+    <div class="goal-bar-wrap">
+      <div class="goal-bar-labels">
+        <span>0</span>
+        <span>69 leads en 18 días · 3.83/día de corte</span>
+        <span>120</span>
+      </div>
+      <div class="goal-bar-track"><div class="goal-bar-fill" style="width:57.5%;background:linear-gradient(90deg,#3b82f6,#10b981)"></div></div>
+    </div>
+    <div class="goal-pct" style="color:#059669">57.5%</div>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpi-grid">
+    <div class="kpi-card" style="--accent-color:#10b981">
+      <div class="kpi-label">Leads generados</div>
+      <div class="kpi-value">69</div>
+      <div class="kpi-sub">Campañas de formulario · corte al 18/11</div>
+      <div class="kpi-badge badge-good">Proyección de cierre: ~115 (95.8% de la meta) si se sostiene el ritmo</div>
+    </div>
+    <div class="kpi-card" style="--accent-color:#3b82f6">
+      <div class="kpi-label">Inversión en captación</div>
+      <div class="kpi-value">$638K</div>
+      <div class="kpi-sub">ARS · 18 días · + $29.1K en tráfico (aparte, no comparable)</div>
+      <div class="kpi-badge badge-warn">~$35.5K/día de promedio</div>
+    </div>
+    <div class="kpi-card" style="--accent-color:#dc2626">
+      <div class="kpi-label">Costo por lead</div>
+      <div class="kpi-value">$9.253</div>
+      <div class="kpi-sub">ARS · sólo campañas de formulario</div>
+      <div class="kpi-badge badge-bad">El más caro de los últimos 4 meses (ago $8.429 · sep $6.839 · oct $7.975)</div>
+    </div>
+    <div class="kpi-card" style="--accent-color:#06b6d4">
+      <div class="kpi-label">Impresiones</div>
+      <div class="kpi-value">80.7K</div>
+      <div class="kpi-sub">Campañas de formulario · 18 días</div>
+      <div class="kpi-badge badge-warn">CPM $7.916 · CTR estimado 0.82%</div>
+    </div>
+    <div class="kpi-card" style="--accent-color:#8b5cf6">
+      <div class="kpi-label">Interacciones</div>
+      <div class="kpi-value">12.352</div>
+      <div class="kpi-sub">Con publicaciones · campañas de formulario</div>
+      <div class="kpi-badge badge-warn">49.665 personas alcanzadas</div>
+    </div>
+    <div class="kpi-card" style="--accent-color:#d97706">
+      <div class="kpi-label">Frecuencia</div>
+      <div class="kpi-value">~1.62x</div>
+      <div class="kpi-sub">Por persona promedio</div>
+      <div class="kpi-badge badge-warn">Más alta que los meses previos (~1.17-1.21x), todavía bajo el umbral de alerta (1.8x)</div>
+    </div>
+  </div>
+
+  <!-- EVOLUCIÓN -->
+  <div class="section">
+    <div class="section-title">Evolución de la campaña en el tiempo</div>
+    <div class="chart-grid single">
+      <div class="chart-card">
+        <h3>Leads diarios e inversión — Noviembre 2026 (corte al 18/11)</h3>
+        <canvas id="noEvolucion"></canvas>
+      </div>
+    </div>
+    <div class="insight-box">
+      La inversión diaria viene en un rango más alto que meses anteriores (entre $21K y $55K/día) desde que arrancó "Form ABO Abierto ARG NOV". El mejor día del corte fue el 16/11 (6 leads), seguido de cerca por el 04 y 09/11 (6 y 6). El 13/11 fue el más flojo (1 lead, $27.597 invertidos).
+    </div>
+  </div>
+
+  <!-- EVOLUCIÓN SEMANAL -->
+  <div class="section">
+    <div class="section-title">Evolución semana a semana</div>
+    <div class="chart-grid single">
+      <div class="chart-card">
+        <h3>Leads y CPL por semana — Noviembre 2026</h3>
+        <canvas id="noSemanal"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <h3>Detalle semanal</h3>
+      <table class="data-table">
+        <thead><tr><th>Semana</th><th>Días</th><th>Leads</th><th>Leads/día</th><th>CPL</th></tr></thead>
+        <tbody>
+          <tr><td>Semana 1 (1–7)</td><td class="num">7</td><td class="num">26</td><td class="num">3.71</td><td class="num cpl-mid">$9.614</td></tr>
+          <tr><td>Semana 2 (8–14)</td><td class="num">7</td><td class="num">27</td><td class="num">3.86</td><td class="num cpl-bad">$10.200</td></tr>
+          <tr><td>Semana 3 (15–18)*</td><td class="num">4</td><td class="num">16</td><td class="num">4.00</td><td class="num cpl-good">$7.069</td></tr>
+        </tbody>
+      </table>
+      <div class="insight-box">El volumen semanal es parejo (26, 27 y 16 leads en lo que va de la semana 3), pero el CPL mejoró en los últimos días: de $10.200 en la semana 2 a $7.069 en los primeros 4 días de la semana 3. Coincide con que "Form AGENTE" dejó de recibir presupuesto desde el 17/11 y el peso se concentró en los conjuntos con mejor historial.</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px">*Semana incompleta — 4 días (15–18/11)</div>
+    </div>
+  </div>
+
+  <!-- CAMPAÑAS -->
+  <div class="section">
+    <div class="section-title">Rendimiento por campaña</div>
+    <p style="font-size:13px;color:var(--muted);margin:-12px 0 20px;">Cinco campañas de formulario con actividad en el corte; una es nueva de noviembre y otra —la que venía funcionando mejor— se pausó a mitad de mes.</p>
+    <div class="campaign-grid">
+      <div class="campaign-card">
+        <h4>Frío - Form - ABO - ABIERTO - ARG - NOV <span class="camp-pill">Nueva · noviembre</span></h4>
+        <div class="campaign-stat-row"><span class="label">Leads</span><span class="value">21 — 30% del total</span></div>
+        <div class="campaign-stat-row"><span class="label">Inversión</span><span class="value">$282.667 ARS</span></div>
+        <div class="campaign-stat-row"><span class="label">Costo por lead</span><span class="value cpl-bad">$13.460 ARS</span></div>
+        <div class="campaign-stat-row"><span class="label">Estado</span><span class="value">Activa · 44% del gasto del mes, el CPL más alto</span></div>
+      </div>
+      <div class="campaign-card" style="opacity:0.85">
+        <h4>Frío - Form AGENTE - ABO - ABIERTO <span class="adset-pill">Pausada desde ~17/11</span></h4>
+        <div class="campaign-stat-row"><span class="label">Leads</span><span class="value cpl-good">25 — 36% del total</span></div>
+        <div class="campaign-stat-row"><span class="label">Inversión</span><span class="value">$151.693 ARS</span></div>
+        <div class="campaign-stat-row"><span class="label">Costo por lead</span><span class="value cpl-good">$6.068 ARS</span></div>
+        <div class="campaign-stat-row"><span class="label">Estado</span><span class="value">La más eficiente del mes, hoy sin presupuesto</span></div>
+      </div>
+      <div class="campaign-card">
+        <h4>Frío - FORM ABO - LAL vs Intereses <span class="camp-pill">En curso desde octubre</span></h4>
+        <div class="campaign-stat-row"><span class="label">Leads</span><span class="value">19 — 28% del total</span></div>
+        <div class="campaign-stat-row"><span class="label">Inversión</span><span class="value">$145.705 ARS</span></div>
+        <div class="campaign-stat-row"><span class="label">Costo por lead</span><span class="value cpl-mid">$7.669 ARS</span></div>
+        <div class="campaign-stat-row"><span class="label">Estado</span><span class="value">Activa · segunda más eficiente del mes</span></div>
+      </div>
+      <div class="campaign-card" style="opacity:0.85">
+        <h4>Frío - Form - CBO - ABIERTO - ARG <span class="adset-pill">Mayormente pausada</span></h4>
+        <div class="campaign-stat-row"><span class="label">Leads</span><span class="value">3 — 4% del total</span></div>
+        <div class="campaign-stat-row"><span class="label">Inversión</span><span class="value">$32.368 ARS</span></div>
+        <div class="campaign-stat-row"><span class="label">Costo por lead</span><span class="value cpl-mid">$10.789 ARS</span></div>
+        <div class="campaign-stat-row"><span class="label">Estado</span><span class="value">Sin gasto desde el 05/11</span></div>
+      </div>
+      <div class="campaign-card" style="opacity:0.85">
+        <h4>Frío - Form - CBO - LAL 1 <span class="adset-pill">Mayormente pausada</span></h4>
+        <div class="campaign-stat-row"><span class="label">Leads</span><span class="value">1 — 1% del total</span></div>
+        <div class="campaign-stat-row"><span class="label">Inversión</span><span class="value">$26.038 ARS</span></div>
+        <div class="campaign-stat-row"><span class="label">Costo por lead</span><span class="value cpl-bad">$26.038 ARS</span></div>
+        <div class="campaign-stat-row"><span class="label">Estado</span><span class="value">Sin gasto desde el 05/11</span></div>
+      </div>
+      <div class="campaign-card" style="opacity:0.7">
+        <h4>Tráfico - [ABIERTA][FRÍO] <span class="adset-pill">Aparte · objetivo distinto</span></h4>
+        <div class="campaign-stat-row"><span class="label">Inversión</span><span class="value">$29.112 ARS</span></div>
+        <div class="campaign-stat-row"><span class="label">Resultado</span><span class="value">139 visitas al perfil ($209 c/u)</span></div>
+        <div class="campaign-stat-row"><span class="label">Estado</span><span class="value">No comparable en CPL</span></div>
+      </div>
+    </div>
+    <div class="chart-grid">
+      <div class="chart-card"><h3>Leads por campaña de formulario</h3><canvas id="noCampLeads"></canvas></div>
+      <div class="chart-card"><h3>Costo por lead por campaña (ARS)</h3><canvas id="noCampCPL"></canvas></div>
+    </div>
+    <div class="insight-box insight-warn">
+      <strong>La campaña que mejor funcionaba se pausó a mitad de mes.</strong> "Form AGENTE" cerró con el mejor CPL de noviembre ($6.068, 25 leads) y dejó de recibir presupuesto desde el 17/11. En su lugar, el gasto se concentró en "Form ABO Abierto ARG NOV", una campaña nueva que todavía no encuentra la misma eficiencia ($13.460 de CPL, el más alto de las cinco). "FORM ABO LAL vs Intereses" es la segunda más eficiente ($7.669) y sigue activa.
+    </div>
+  </div>
+
+  <!-- ANUNCIOS -->
+  <div class="section">
+    <div class="section-title">Rendimiento por anuncio</div>
+    <div class="chart-card">
+      <h3>Anuncios de campañas de formulario — leads y gasto (corte al 18/11)</h3>
+      <table class="data-table">
+        <thead><tr><th>#</th><th>Anuncio</th><th>Leads</th><th>CPL (ARS)</th><th>Gasto (ARS)</th><th>% del gasto</th><th>Evaluación</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="rank rank-1">1</span></td>
+            <td><div style="font-weight:600">Ángulo 1 - OCT</div><span class="camp-pill">3 conjuntos distintos</span></td>
+            <td class="num">20</td><td class="num cpl-mid">$7.563</td><td class="num">$151.269</td><td class="num">23.7%</td>
+            <td style="font-size:12px;color:var(--muted)">Más leads del mes, repartido en 3 campañas/conjuntos</td>
+          </tr>
+          <tr>
+            <td><span class="rank rank-2">2</span></td>
+            <td><div style="font-weight:600">Teleconsultas 1</div><span class="camp-pill">Form AGENTE (pausada)</span></td>
+            <td class="num">25</td><td class="num cpl-good">$5.978</td><td class="num">$149.447</td><td class="num">23.4%</td>
+            <td style="font-size:12px;color:var(--muted)">Mejor CPL con volumen · sin presupuesto desde que se pausó la campaña</td>
+          </tr>
+          <tr>
+            <td><span class="rank rank-3">3</span></td>
+            <td><div style="font-weight:600">i-Professional</div><span class="camp-pill">4 campañas distintas</span></td>
+            <td class="num">8</td><td class="num cpl-bad">$15.313</td><td class="num">$122.507</td><td class="num">19.2%</td>
+            <td style="font-size:12px;color:var(--muted)">Segundo en gasto, CPL muy por encima del resto</td>
+          </tr>
+          <tr>
+            <td><span class="rank">4</span></td>
+            <td><div style="font-weight:600">Ángulo 6 - OCT</div><span class="camp-pill">LAL vs Intereses</span></td>
+            <td class="num">10</td><td class="num cpl-good">$4.877</td><td class="num">$48.766</td><td class="num">7.6%</td>
+            <td style="font-size:12px;color:var(--muted)">Mejor CPL de todos los anuncios con volumen real</td>
+          </tr>
+          <tr>
+            <td><span class="rank">5</span></td>
+            <td><div style="font-weight:600">Ángulo 5</div><span class="camp-pill">Form ABO Abierto ARG NOV</span></td>
+            <td class="num">4</td><td class="num cpl-bad">$16.232</td><td class="num">$64.930</td><td class="num">10.2%</td>
+            <td style="font-size:12px;color:var(--muted)">Muestra chica, CPL alto</td>
+          </tr>
+          <tr>
+            <td><span class="rank">—</span></td>
+            <td><div style="font-weight:600">Ángulo 4 - OCT</div><span class="camp-pill">3 conjuntos</span></td>
+            <td class="num">0</td><td class="num">—</td><td class="num">$45.078</td><td class="num">7.1%</td>
+            <td style="font-size:12px;color:var(--muted)">Sin leads en el corte, $45K invertidos</td>
+          </tr>
+          <tr>
+            <td><span class="rank">—</span></td>
+            <td><div style="font-weight:600">Ángulo 4, GPT Prueba 2, i-Centros de Salud, Teleconsultas 3, Integrando GPT 1</div><span class="camp-pill">Varias campañas</span></td>
+            <td class="num">2</td><td class="num">—</td><td class="num">$56.473</td><td class="num">8.8%</td>
+            <td style="font-size:12px;color:var(--muted)">Muestra chica o sin señal</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="insight-box insight-bad">
+        <strong>i-Professional es el dato que más pide atención.</strong> Segundo anuncio en gasto del mes ($122.507, 19.2% del total) con el peor CPL de los que tienen volumen real ($15.313) — casi el triple que Ángulo 6 - OCT ($4.877). Está repartido en cuatro campañas distintas, ninguna lo sostiene de forma eficiente. "Ángulo 1 - OCT" es el anuncio con más leads del mes (20) y "Teleconsultas 1" el más eficiente con volumen (25 leads, $5.978) — aunque este último se quedó sin presupuesto cuando se pausó su campaña.
+      </div>
+    </div>
+  </div>
+
+  <!-- INDICADORES -->
+  <div class="section">
+    <div class="section-title">Indicadores de relevancia y calidad</div>
+    <div class="relevance-grid">
+      <div class="relevance-card">
+        <div class="r-label">CPL más bajo (anuncio con volumen)</div>
+        <div class="r-value r-good">$4.877</div>
+        <div class="r-desc">Ángulo 6 - OCT · 10 leads dentro de "FORM ABO LAL vs Intereses".</div>
+      </div>
+      <div class="relevance-card">
+        <div class="r-label">Frecuencia</div>
+        <div class="r-value r-warn">~1.62x</div>
+        <div class="r-desc">Más alta que los últimos tres meses. Teleconsultas 1 solo llegó a 2.42x — posible señal de desgaste de audiencia antes de que se pausara su campaña.</div>
+      </div>
+      <div class="relevance-card">
+        <div class="r-label">Inversión sin ningún lead</div>
+        <div class="r-value r-bad">$51.873</div>
+        <div class="r-desc">Ángulo 4 - OCT ($45.078) + i-Centros de Salud ($6.795), sin resultado en el corte.</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  <div>Reporte generado por <span>dynic</span> · Datos leídos en vivo de Meta Ads Manager (API) · Atribución 1 día vista / 7 días clic · CTR estimado a partir de clics al enlace</div>
+  <div>Cliente: Integrando Salud · Noviembre 2026 (corte parcial, 1–18)</div>
+</div>
+
+<script>
+const ACCENT='#10b981', ACCENT2='#ef4444', ACCENT3='#f59e0b', ACCENT4='#3b82f6';
+const PURPLE='#8b5cf6', TEAL='#06b6d4', TEXT='#0f172a';
+Chart.defaults.color='#64748b';
+Chart.defaults.font.family="'DM Sans', sans-serif";
+Chart.defaults.font.size=12;
+const grid='rgba(0,0,0,0.06)';
+const tt={backgroundColor:'#ffffff',borderColor:'rgba(0,0,0,0.1)',borderWidth:1,titleColor:TEXT,bodyColor:'#64748b',padding:10};
+const ars=v=>'$'+Math.round(v).toLocaleString('es-AR');
+
+const dailyNov=[
+  {d:'01/11',l:2,f:34949},{d:'02/11',l:2,f:33828},{d:'03/11',l:5,f:29280},{d:'04/11',l:6,f:36897},
+  {d:'05/11',l:4,f:36828},{d:'06/11',l:3,f:40079},{d:'07/11',l:4,f:38113},{d:'08/11',l:5,f:52618},
+  {d:'09/11',l:6,f:48263},{d:'10/11',l:5,f:53594},{d:'11/11',l:4,f:39288},{d:'12/11',l:4,f:27948},
+  {d:'13/11',l:1,f:27597},{d:'14/11',l:2,f:26087},{d:'15/11',l:4,f:36821},{d:'16/11',l:6,f:28745},
+  {d:'17/11',l:2,f:26510},{d:'18/11',l:4,f:21024}
+];
+const weeklyNov=[{w:'Sem 1 (1–7)',l:26,cpl:9614},{w:'Sem 2 (8–14)',l:27,cpl:10200},{w:'Sem 3 (15–18)*',l:16,cpl:7069}];
+
+new Chart(document.getElementById('noEvolucion'),{
+  type:'bar',
+  data:{labels:dailyNov.map(d=>d.d),
+    datasets:[
+      {type:'line',label:'Leads diarios',data:dailyNov.map(d=>d.l),borderColor:ACCENT,backgroundColor:'rgba(16,185,129,0.08)',borderWidth:2,pointRadius:4,pointBackgroundColor:ACCENT,tension:0.3,yAxisID:'y',fill:true},
+      {type:'bar',label:'Inversión total (÷1000 ARS)',data:dailyNov.map(d=>d.f/1000),backgroundColor:'rgba(59,130,246,0.15)',borderColor:ACCENT4,borderWidth:1,yAxisID:'y2',borderRadius:4}
+    ]},
+  options:{responsive:true,maintainAspectRatio:true,interaction:{mode:'index',intersect:false},
+    plugins:{legend:{position:'top',labels:{color:TEXT,boxWidth:12,padding:16}},tooltip:{...tt,callbacks:{label:c=>c.datasetIndex===0?' '+c.raw+' leads':' '+ars(c.raw*1000)+' ARS'}}},
+    scales:{x:{grid:{color:grid},ticks:{color:'#64748b',maxRotation:45,font:{size:10}}},
+      y:{type:'linear',position:'left',title:{display:true,text:'Leads',color:'#059669'},grid:{color:grid},ticks:{color:'#059669',stepSize:1}},
+      y2:{type:'linear',position:'right',title:{display:true,text:'Inversión (÷1000)',color:ACCENT4},grid:{drawOnChartArea:false},ticks:{color:ACCENT4}}}}
+});
+
+new Chart(document.getElementById('noSemanal'),{
+  type:'bar',
+  data:{labels:weeklyNov.map(w=>w.w),
+    datasets:[
+      {type:'bar',label:'Leads',data:weeklyNov.map(w=>w.l),backgroundColor:'rgba(59,130,246,0.55)',borderColor:ACCENT4,borderWidth:1,borderRadius:6,yAxisID:'y'},
+      {type:'line',label:'CPL (ARS)',data:weeklyNov.map(w=>w.cpl),borderColor:ACCENT2,borderWidth:2.5,pointRadius:5,pointBackgroundColor:ACCENT2,tension:0.2,yAxisID:'y2'}
+    ]},
+  options:{responsive:true,interaction:{mode:'index',intersect:false},
+    plugins:{legend:{position:'top',labels:{color:TEXT,boxWidth:12,padding:16}},tooltip:{...tt,callbacks:{label:c=>c.datasetIndex===0?' '+c.raw+' leads':' '+ars(c.raw)+' ARS'}}},
+    scales:{x:{grid:{color:grid}},
+      y:{type:'linear',position:'left',title:{display:true,text:'Leads',color:ACCENT4},grid:{color:grid},ticks:{color:ACCENT4,stepSize:5}},
+      y2:{type:'linear',position:'right',title:{display:true,text:'CPL (ARS)',color:ACCENT2},grid:{drawOnChartArea:false},ticks:{color:ACCENT2,callback:v=>'$'+v}}}}
+});
+
+new Chart(document.getElementById('noCampLeads'),{
+  type:'doughnut',
+  data:{labels:['Form ABO Abierto ARG NOV','Form AGENTE (pausada)','FORM ABO LAL vs Intereses','CBO Abierto ARG','CBO LAL 1'],
+    datasets:[{data:[21,25,19,3,1],backgroundColor:[ACCENT2,ACCENT,ACCENT4,PURPLE,ACCENT3],borderWidth:0}]},
+  options:{responsive:true,plugins:{legend:{position:'bottom',labels:{color:TEXT,boxWidth:11,padding:9,font:{size:10}}},tooltip:{...tt,callbacks:{label:c=>' '+c.raw+' leads ('+Math.round(c.raw/69*100)+'%)'}}},cutout:'65%'}
+});
+new Chart(document.getElementById('noCampCPL'),{
+  type:'bar',
+  data:{labels:['Form ABO Abierto ARG NOV','Form AGENTE (pausada)','FORM ABO LAL vs Intereses','CBO Abierto ARG','CBO LAL 1'],
+    datasets:[{label:'CPL (ARS)',data:[13460,6068,7669,10789,26038],backgroundColor:[ACCENT2,ACCENT,ACCENT4,PURPLE,ACCENT3],borderRadius:8,borderWidth:0}]},
+  options:{responsive:true,indexAxis:'y',plugins:{legend:{display:false},tooltip:{...tt,callbacks:{label:c=>' '+ars(c.raw)+' ARS'}}},scales:{x:{grid:{color:grid},ticks:{callback:v=>'$'+v.toLocaleString('es-AR')}},y:{grid:{color:grid},ticks:{font:{size:10}}}}}
+});
+</script>
+
+</body>
+</html>
